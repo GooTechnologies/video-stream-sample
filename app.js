@@ -19,8 +19,6 @@ app.use(function(req, res, next){
       if(range){
         var positions = range.replace(/bytes=/, "").split("-");
         var start = parseInt(positions[0], 10);
-
-
         var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
         var chunksize = (end - start) + 1;
 
