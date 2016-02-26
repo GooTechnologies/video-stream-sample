@@ -1,5 +1,5 @@
 {
-  "name": "goo-video-example",
+  "name": "video-stream-sample",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -9,8 +9,9 @@
   },
   "devDependencies": {},
   "scripts": {
+    "start": "node app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Stefan Hedman",
   "license": "MIT"
 }
