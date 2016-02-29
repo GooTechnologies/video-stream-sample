@@ -17,6 +17,8 @@ app.use(function(req, res, next){
       var total = stats.size;
 
       if(range){
+        console.log('RANGE: ' + range);
+
         var positions = range.replace(/bytes=/, "").split("-");
         var start = parseInt(positions[0], 10);
         var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
