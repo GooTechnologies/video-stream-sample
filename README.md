@@ -18,21 +18,6 @@ npm start;
 The following script can be used to put a video texture on a mesh. Follow the instructions carefully! Hopefully we'll soon fix the video loader in Goo Engine so you won't need this script.
 
 ```js
-/**
- * Stream video in Goo Create!
- * 1. Upload a video to Create by dropping the file into the asset bin.
- * 2. Put it in the videoTexture slot in this script (this is needed, otherwise the video file won't get published).
- * 3. Publish.
- * 4. Copy the URL of the video in the published scene (check the network panel in Chrome Devtools).
- * 5. Paste the URL in the videoUrl parameter input.
- * 6. Set the texture as lazy load.
- * 7. Done!
- */
-
-'use strict';
-
-/* global goo */
-
 var setup = function (args, ctx) {
 	var video = document.createElement('video');
 	video.autoplay = true;
@@ -54,40 +39,33 @@ var setup = function (args, ctx) {
 	};
 
 	video.oncanplay = function(){
-		console.log('canplay');
-		ctx.canPlay = true;
-		ctx.video = video;
+		// try to start playing - this may fail on some devices
+		video.play();
 	};
-
 	video.src = args.videoUrl;
 
-	if(video.paused){
-		console.log('Needs touch to start video');
-	}
+	video.width = video.videoWidth;
+	video.height = video.videoHeight;
+	var texture = new goo.Texture();
+	texture.wrapT = texture.wrapS = 'EdgeClamp';
+	texture.generateMipmaps = false;
+	texture.minFilter = 'BilinearNoMipMaps';
+	texture.setImage(video);
+	ctx.entity.meshRendererComponent.materials[0].setTexture('DIFFUSE_MAP', texture);
+	texture.updateCallback = function () {
+		return !video.paused;
+	};
+	video.onprogress = function(){
+		video.dataReady = true;
+	};
 
 	ctx.listeners = {
-		mousedown: function(){
-			console.log('touchend');
-			if(ctx.canPlay && !ctx.started){
-				console.log('play()');
-				video.play();
-				video.width = video.videoWidth;
-				video.height = video.videoHeight;
-				var texture = new goo.Texture();
-				texture.generateMipmaps = false;
-				texture.minFilter = 'BilinearNoMipMaps';
-				texture.setImage(video);
-				ctx.entity.meshRendererComponent.materials[0].setTexture('DIFFUSE_MAP', texture);
-				texture.updateCallback = function () {
-					return !video.paused;
-				};
-				ctx.texture = texture;
-				ctx.started = true;
-				video.dataReady = true;
-			}
+		touchend: function(){
+			console.log("Got touchend, trying to play...");
+			ctx.domElement.removeEventListener('touchend', ctx.listeners.touchend);
+			video.play();
 		}
 	};
-	ctx.domElement.ontouchend = ctx.listeners.mousedown;
 	for(var key in ctx.listeners){
 		ctx.domElement.addEventListener(key, ctx.listeners[key]);
 	}
@@ -106,5 +84,10 @@ var parameters = [{
 },{
 	key: 'videoTexture',
 	type: 'texture'
+},{
+	key: 'eventChannel',
+	description: '',
+	type: 'string',
+	'default': 'videoPlay'
 }];
 ```
