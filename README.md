@@ -57,6 +57,10 @@ var setup = function (args, ctx) {
 	};
 	video.onprogress = function(){
 		video.dataReady = true;
+		if(!ctx.sentEvent){
+			goo.SystemBus.emit(args.eventChannel);
+			ctx.sentEvent = true;
+		}
 	};
 
 	ctx.listeners = {
